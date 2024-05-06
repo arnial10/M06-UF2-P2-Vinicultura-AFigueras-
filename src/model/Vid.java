@@ -1,14 +1,14 @@
 package model;
-
+ 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
+ 
 import utils.TipoVid;
-
+ 
 @Entity
 @Table(name= "vid")
 public class Vid {
@@ -19,10 +19,8 @@ public class Vid {
 	@Column(name = "tipo_vid", nullable = true)
 	private TipoVid vid;
 	@Column(name = "cantidad", nullable = true)
-	private Integer cantidad;
-	
+	private int cantidad;
 	public Vid() {}
-		
 	public Vid(TipoVid vid, int cantidad) {
 		this.vid = vid;
 		this.cantidad = cantidad;
