@@ -9,12 +9,17 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import org.bson.Document;
- 
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
+import com.mysql.cj.xdevapi.UpdateResult;
 
 import model.Bodega;
 import model.Campo;
@@ -69,11 +74,14 @@ public class Manager {
 						addBodega(entrada.getInstruccion().split(" "));
 						break;
 					case "C":
-						addCampo(entrada.getInstruccion().split(" "));
+						addCampo(entrada.getInstruccion().split(" "), false);
 						break;
 					case "V":
 						addVid(entrada.getInstruccion().split(" "));
 						break;
+					case "M":
+					    markAsVendimiado(entrada.getInstruccion().split(" "));
+					    break;
 					case "#":
 //						vendimia();
 						break;
@@ -126,13 +134,17 @@ public class Manager {
 		c = session.get(Campo.class, id);
 		tx.commit();
 	}*/
-	private void addCampo(String[] split) {
+	private void addCampo(String[] split, boolean vendimiado){
 		c = new Campo(b);
 		collection = database.getCollection("bodega");
 		Document lastBodega = collection.find().sort(new Document("_id", -1)).first();
 		collection = database.getCollection("campo");
 		Document document = new Document().append("nombre", lastBodega);
+		   document.put("vendimiado", vendimiado);
+		   Campo nuevoCampo = new Campo();
+		   nuevoCampo.setVendimiado(vendimiado); // Establecer el valor de vendimiado en el objeto Campo// Establecer el valor de vendimiado
 		collection.insertOne(document);
+		
 	}
 
 	/*private void addBodega(String[] split) {
@@ -165,7 +177,30 @@ public class Manager {
 		System.out.println(entradas.toString());
 		
 	}
- 
+	private void markAsVendimiado(String[] parts) {
+	    if (parts.length >= 2) {
+	        String campoId = parts[1];
+	       
+	        // Crear el filtro para buscar el campo por su ID
+	        Bson filter = Filters.eq("_id", new ObjectId(campoId));
+	       
+	        // Crear la actualización para establecer "vendimiado" en true
+	        Bson update = Updates.set("vendimiado", true);
+	       
+	        // Ejecutar la actualización en la colección de campos
+	        MongoCollection<Document> campoCollection = database.getCollection("campo");
+	        com.mongodb.client.result.UpdateResult updateResult = campoCollection.updateOne(filter, update);
+	       
+	        // Verificar si se realizó la actualización correctamente
+	        if (updateResult.getModifiedCount() > 0) {
+	            System.out.println("Campo marcado como vendimiado correctamente.");
+	        } else {
+	            System.out.println("No se encontró ningún campo con el ID proporcionado.");
+	        }
+	    } else {
+	        System.out.println("La instrucción no tiene el formato esperado.");
+	    }
+	}
 	/*private void showAllCampos() {
 		tx = session.beginTransaction();
 		Query q = session.createQuery("select c from Campo c");

@@ -28,6 +28,17 @@ public class Campo {
 	@OneToOne
 	@JoinColumn(name = "id_bodega")
 	private Bodega bodega;
+	public boolean isVendimiado() {
+		return vendimiado;
+	}
+
+	public void setVendimiado(boolean vendimiado) {
+		this.vendimiado = vendimiado;
+	}
+
+	@Column(name = "vendimiado",columnDefinition = "boolean default false")
+	private boolean vendimiado;
+
 	public Campo() {}
  
 	public Campo(Bodega b) {
@@ -50,4 +61,6 @@ public class Campo {
 		vids.addAll(this.vids);
 		return vids;
 	}
+
+	
 }
