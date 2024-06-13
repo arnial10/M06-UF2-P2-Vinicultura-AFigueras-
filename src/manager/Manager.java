@@ -1,5 +1,6 @@
 package manager;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
  
  
@@ -17,6 +18,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.Updates;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
 import com.mysql.cj.xdevapi.UpdateResult;
@@ -39,6 +41,8 @@ public class Manager {
 
 	private Manager () {
 		this.entradas = new ArrayList<>();
+		 
+       
 	}
 	public static Manager getInstance() {
 		if (manager == null) {
@@ -46,6 +50,20 @@ public class Manager {
 		}
 		return manager;
 	}
+	
+	 private int getVendimia() {
+
+	        MongoCollection<Document> vendimias = database.getCollection("vendimias");
+	        System.out.println("ola");
+	        collection = database.getCollection("vendimias");
+	        Document Vendimia = vendimias.find().sort(Sorts.descending("counter")).first();
+	        if (Vendimia != null) {
+	            return Vendimia.getInteger("counter", 0);
+	        } else {
+	            return 0;
+	        }
+	    }
+	
 	private void createSession() {
 	    //org.hibernate.SessionFactory sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
 //	    session = sessionFactory.openSession();
@@ -56,7 +74,7 @@ public class Manager {
 	    database = mongoClient.getDatabase("MongoDBArnauFigueras");
 	}
 
- 
+	
 	public void init() {
 		createSession();
 		getEntrada();
@@ -83,7 +101,7 @@ public class Manager {
 					    markAsVendimiado(entrada.getInstruccion().split(" "));
 					    break;
 					case "#":
-//						vendimia();
+						vendimia(entrada.getInstruccion().split(""));
 						break;
 					default:
 						System.out.println("Instruccion incorrecta");
@@ -97,12 +115,17 @@ public class Manager {
 		}
 	}
  
-	private void vendimia() {
-		this.b.getVids().addAll(this.c.getVids());
-		tx = session.beginTransaction();
-		session.save(b);
-		tx.commit();
-	}
+	private void vendimia(String[] split) {
+        this.b.getVids().addAll(this.c.getVids());
+        tx = session.beginTransaction();
+        session.save(b);
+        tx.commit();
+ 
+        getVendimia();
+       
+    }
+ 
+   
  
 	/*private void addVid(String[] split) {
 		Vid v = new Vid(TipoVid.valueOf(split[1].toUpperCase()), Integer.parseInt(split[2]));
